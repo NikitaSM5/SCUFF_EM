@@ -1,0 +1,33 @@
+{
+  "geometry_units": "mm",
+  "mesh_format": "Gmsh 2.2 ASCII",
+  "selected_meshtag": 1,
+  "mesh_triangles_by_tag": {
+    "1": 64,
+    "2": 72,
+    "3": 48
+  },
+  "selected_triangles": 64,
+  "expected_unknowns": 76,
+  "bounding_box_mm": [
+    [
+      0.0,
+      -3.061224489795919,
+      -31.22448979591837
+    ],
+    [
+      0.0,
+      3.061224489795919,
+      31.22448979591837
+    ]
+  ],
+  "gap_mm": 2.448979591836734,
+  "width_mm": 6.122448979591838,
+  "arm_length_mm": 30.000000000000004,
+  "tip_to_tip_mm": 62.44897959183674,
+  "sha256": {
+    "DipoleAntenna_Medium.scuffgeo": "699e8fb698fcc1b434aa1fc0a2f21057462ee310ee881364ec1fc640a501a956",
+    "PlanarYUAntenna_Medium.msh": "25619295ba2044151f1db47c2a59d50385cce47ad76f6f88edffa60297d9b743",
+    "Dipole.ports": "c3408c22d9fa2cd99e7bb2e2f1338c2d08e94a7c97e4c4e8f14bc67e42287a38"
+  }
+}

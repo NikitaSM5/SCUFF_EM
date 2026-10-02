@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'">
+<title>Антенна и ДН</title>
+<style>
+html,body { margin:0; width:100%; height:100%; overflow:hidden; font:12px 'Segoe UI',sans-serif; letter-spacing:0; background:#fff; }
+canvas { display:block; width:100%; height:100%; touch-action:none; }
+#legend { position:absolute; right:12px; top:12px; display:none; pointer-events:none; background:rgba(255,255,255,.88); padding:8px; }
+#bar { width:14px; height:140px; background:linear-gradient(to bottom,#ff3822,#ffee33,#23be70,#166fc0); margin:6px 0; }
+#error { display:none; position:absolute; inset:16px; color:#b02020; }
+#units { position:absolute; left:12px; bottom:10px; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="legend"><div>Gain, dBi</div><div id="high"></div><div id="bar"></div><div id="low"></div></div>
+<div id="units"></div><div id="error"></div>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="viewer.js"></script>
+</body>
+</html>

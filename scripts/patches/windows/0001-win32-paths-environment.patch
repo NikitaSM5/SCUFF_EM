@@ -1,0 +1,131 @@
+diff --git a/applications/scuff-rf/scuff-rf.cc b/applications/scuff-rf/scuff-rf.cc
+index 90dd4bb..c3d03fe 100644
+--- a/applications/scuff-rf/scuff-rf.cc
++++ b/applications/scuff-rf/scuff-rf.cc
+@@ -244,7 +244,12 @@ int main(int argc, char *argv[])
+      memset(PCVector, 0, NumPorts*sizeof(cdouble));
+      PCVector[np]=1.0;
+      AddPortContributionsToRHS(G, Ports, NumPorts, PCVector, FREQ2OMEGA * FreqList->GetEntry(0), KN);
++#ifdef _WIN32
++     FILE *f=vfopen("Port%i.Old","w",np);
++#else
+      FILE *f=vfopen("/tmp/Port%i.Old","w",np);
++#endif
++     if (!f) ErrExit("could not open port diagnostic file");
+      for(int ne=0; ne<KN->N; ne++)
+       fprintf(f,"%5i   %+.12e   %+.12e\n",ne,real(KN->GetEntry(ne)),imag(KN->GetEntry(ne)));
+      fclose(f);
+diff --git a/libs/libSpherical/machcon.c b/libs/libSpherical/machcon.c
+index 334aee7..eec2226 100644
+--- a/libs/libSpherical/machcon.c
++++ b/libs/libSpherical/machcon.c
+@@ -33,6 +33,7 @@ typedef int logical;
+ typedef int ftnlen;
+ 
+ #include <stdio.h>
++#include <stdlib.h>
+ 
+ /* Table of constant values */
+ 
+@@ -1579,4 +1580,3 @@ doublereal d1mach_(integer *i__)
+ /* ***FIRST EXECUTABLE STATEMENT  FDUMP */
+     return 0;
+ } /* fdump_ */
+-
+diff --git a/libs/libhrutil/Vector.cc b/libs/libhrutil/Vector.cc
+index bc4152d..c36ab62 100644
+--- a/libs/libhrutil/Vector.cc
++++ b/libs/libhrutil/Vector.cc
+@@ -461,7 +461,13 @@ void fprintVecCR(FILE *f, cdouble *v, int Length, const char *format)
+ /* random number uniformly distributed between A and B *********/
+ /***************************************************************/
+ double randU(double A, double B)
+- { return A + (B-A) * random() * (1.0 / RAND_MAX); }
++ {
++#ifdef _WIN32
++   return A + (B-A) * rand() * (1.0 / RAND_MAX);
++#else
++   return A + (B-A) * random() * (1.0 / RAND_MAX);
++#endif
++ }
+ 
+ /***************************************************************/
+ /* random integer in range [A,B), i.e. strictly less than B    */
+diff --git a/libs/libhrutil/libhrutil.cc b/libs/libhrutil/libhrutil.cc
+index fb2cf33..1a780d5 100644
+--- a/libs/libhrutil/libhrutil.cc
++++ b/libs/libhrutil/libhrutil.cc
+@@ -37,6 +37,7 @@
+ #if defined(_WIN32)
+ #  include <windows.h>
+ #  include <process.h>
++#  include <direct.h>
+ #else
+ #  include <sys/resource.h>
+ #  include <sys/times.h>
+@@ -276,7 +277,14 @@ FILE *fopenPath(const char *Path, const char *FileName,
+    {
+      int n=0;
+      char FullFileName[MAXSTR];
+-     while( *p && *p!=':' && n<MAXSTR )
++     while( *p && n<MAXSTR-1
++#if defined(_WIN32)
++            && *p!=';'
++            && (*p!=':' || (n==1 && isalpha(FullFileName[0]) && (p[1]=='/' || p[1]=='\\')))
++#else
++            && *p!=':'
++#endif
++          )
+       FullFileName[n++] = *p++;
+      strncpy(DirFound,FullFileName,n);
+      DirFound[n]=0;
+@@ -284,7 +292,7 @@ FILE *fopenPath(const char *Path, const char *FileName,
+      strncpy(FullFileName+n,FileName,MAXSTR-n);
+      if ( FILE *f=fopen(FullFileName,Mode) )
+       return f;
+-     if (*p==':') p++;
++     if (*p==':' || *p==';') p++;
+    }
+   return 0;
+ }
+@@ -353,7 +361,7 @@ void vsetenv(const char *VariableName, const char *format, ...)
+ {
+   COMPLETE_VARARGS(format,buffer);
+ #if defined(_WIN32)
+-  SetEnvironmentVariable(VariableName, buffer);
++  _putenv_s(VariableName, buffer);
+ #else
+   setenv(VariableName, buffer, 1);
+ #endif
+@@ -551,7 +559,8 @@ int DetectCorei7()
+ unsigned long GetMemoryUsage(unsigned long *MemoryUsage)
+ {
+ #if defined(_WIN32)
+-  for (int i=0; i<7; ++i) MemoryUsage[i] = 0;
++  if (MemoryUsage)
++    for (int i=0; i<7; ++i) MemoryUsage[i] = 0;
+ #else
+   FILE *f;
+   if ( (f=fopen("/proc/self/statm","r")) )
+@@ -1014,7 +1023,7 @@ void AppendEnv(const char *Name, const char *Separator, const char *format, ...)
+     }
+   }
+   char *New = vstrdup("%s%s%s",Old ? Old:"",Old&&Separator ? Separator:"",buffer);
+-  setenv(Name,New,1);
++  vsetenv(Name,"%s",New);
+   free(New);
+   return;
+ }
+diff --git a/libs/libscuff/RWGGeometry.cc b/libs/libscuff/RWGGeometry.cc
+index b4eb9fc..5cd593c 100644
+--- a/libs/libscuff/RWGGeometry.cc
++++ b/libs/libscuff/RWGGeometry.cc
+@@ -404,7 +404,7 @@ RWGGeometry::RWGGeometry(const char *pGeoFileName, int pLogLevel)
+ 
+   if (CheckEnv("SCUFF_ABORT_ON_FPE"))
+    {
+-#ifndef __APPLE__
++#if !defined(__APPLE__) && !defined(_WIN32)
+      feenableexcept(FE_INVALID | FE_OVERFLOW);
+      Log("Enabling abort-on-floating-point-exception.");
+ #else

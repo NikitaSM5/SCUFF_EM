@@ -1,0 +1,15 @@
+diff --git a/libs/libscuff/RWGSurface.cc b/libs/libscuff/RWGSurface.cc
+--- a/libs/libscuff/RWGSurface.cc
++++ b/libs/libscuff/RWGSurface.cc
+@@ -577,8 +577,9 @@ void RWGSurface::UpdateBoundingBox()
+   for(int np=0; np<NumPanels; np++)
+    for(int nv=0; nv<3; nv++)
+     for(int Mu=0; Mu<3; Mu++)
+-     { RMax[Mu] = fmax(RMax[Mu], Vertices[3*nv + Mu]);
+-       RMin[Mu] = fmin(RMin[Mu], Vertices[3*nv + Mu]);
++     { int vi = Panels[np]->VI[nv];
++       RMax[Mu] = fmax(RMax[Mu], Vertices[3*vi + Mu]);
++       RMin[Mu] = fmin(RMin[Mu], Vertices[3*vi + Mu]);
+      }
+ }
+ 

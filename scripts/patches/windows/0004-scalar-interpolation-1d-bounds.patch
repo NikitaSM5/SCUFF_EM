@@ -1,0 +1,18 @@
+diff --git a/libs/libSubstrate/MOI.cc b/libs/libSubstrate/MOI.cc
+--- a/libs/libSubstrate/MOI.cc
++++ b/libs/libSubstrate/MOI.cc
+@@ -572,10 +572,12 @@ void PhiVDFunc_ScalarGFs(dVec RhoZ, void *UserData, double *PhiVD, iVec dRhoZMax)
+ 
+   ScalarGFOptions Options;
+   memcpy(&Options, &(Data->Options), sizeof(ScalarGFOptions));
+-  Options.NeedDerivatives = (dRhoZMax[0]==2 ? NEED_DRHO : 0) | (dRhoZMax[1]==2 ? NEED_DZ : 0);
++  Options.NeedDerivatives = (dRhoZMax[0]==2 ? NEED_DRHO : 0)
++                         | (dRhoZMax.size()>1 && dRhoZMax[1]==2 ? NEED_DZ : 0);
+  
+   cdouble V[4*NUMSGFS_MOI];
+-  S->GetScalarGFs_MOI(Omega, RhoZ[0], RhoZ[1], V, &Options);
++  double z = (Dimension==1 ? Data->zFixed : RhoZ[1]);
++  S->GetScalarGFs_MOI(Omega, RhoZ[0], z, V, &Options);
+ 
+   //FIXME
+   int NumSGFs = (Options.PPIsOnly ? 2 : NUMSGFS_MOI);

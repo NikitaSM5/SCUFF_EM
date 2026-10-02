@@ -1,0 +1,12 @@
+diff --git a/libs/libscuff/RWGSurface.cc b/libs/libscuff/RWGSurface.cc
+--- a/libs/libscuff/RWGSurface.cc
++++ b/libs/libscuff/RWGSurface.cc
+@@ -672,7 +672,7 @@
+ RWGEdge *RWGSurface::GetEdgeByIndex(int ne)
+ { if ( 0<=ne && ne<NumEdges )
+    return Edges[ne];
+-  else if ( (-ne+1) < NumHalfRWGEdges )
++  else if ( ne<0 && -(ne+1) < NumHalfRWGEdges )
+    return HalfRWGEdges[ -(ne+1) ];
+   else
+    ErrExit("%s:%i: internal error(%i,%i,%i)",__FILE__,__LINE__,Index,NumEdges,ne);
